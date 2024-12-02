@@ -14,7 +14,7 @@ import java.util.List;
 
 public class MyBot extends TelegramLongPollingBot {
 
-    private final String channelUsername = "https://t.me/sarvar_ustoz1";
+    private final String channelUsername = "@sarvar_ustoz1";
     private final String channelInviteLink = "https://t.me/sarvar_ustoz1";
 
     public MyBot(String botToken) {
@@ -43,26 +43,20 @@ public class MyBot extends TelegramLongPollingBot {
             Integer userId = Math.toIntExact(update.getCallbackQuery().getFrom().getId());
 
             if (data.equals("check")) {
-                boolean isSubscribed = checkSubscription(userId);
-
-                if (isSubscribed) {
-                    sendResponse(chatId.toString(), "Obuna bo'lgansiz");
-                } else {
-                    sendResponse(chatId.toString(), "Obuna bo'lmagansiz. Iltimos, obuna bo'ling: " + channelInviteLink);
-                }
+                onCheckSubscription(chatId, userId);
             }
         }
     }
 
     private boolean checkSubscription(Integer userId) {
         GetChatMember getChatMember = new GetChatMember();
-        getChatMember.setChatId("https://t.me/sarvar_ustoz1"); // @username formatida
+        getChatMember.setChatId(channelUsername);
         getChatMember.setUserId(Long.valueOf(userId));
 
         try {
             ChatMember chatMember = execute(getChatMember);
             String status = chatMember.getStatus();
-            return status.equals("member") || status.equals("creator") || status.equals("administrator");
+            return !status.equals("left") && !status.equals("kicked") && !status.equals("restricted");
         } catch (TelegramApiException e) {
             System.out.println("Subscription check error: " + e.getMessage());
             return false;
@@ -89,7 +83,7 @@ public class MyBot extends TelegramLongPollingBot {
         markup.setKeyboard(rowList);
 
         SendMessage message = new SendMessage();
-        message.setText("Quyidagi kanalga obuna bo'ling");
+        message.setText("Bot'dan foydalanish uchun quyidagi kanalga obuna bo'lishingiz kerak:");
         message.setChatId(chatId);
         message.setReplyMarkup(markup);
 
@@ -108,6 +102,17 @@ public class MyBot extends TelegramLongPollingBot {
             execute(message);
         } catch (TelegramApiException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void onCheckSubscription(Long chatId, Integer userId) {
+        boolean isSubscribed = checkSubscription(userId);
+
+        if (isSubscribed) {
+            sendResponse(chatId.toString(), "✅ Tabriklaymiz! Siz kanalga obuna bo'lgansiz.\nBot xizmatlaridan foydalanishingiz mumkin.");
+        } else {
+            sendResponse(chatId.toString(), "❌ Siz hali kanalga obuna bo'lmagansiz.\nIltimos, avval kanalga obuna bo'ling: " + channelInviteLink);
+            sendSubscriptionMessage(chatId);
         }
     }
 

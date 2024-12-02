@@ -10,7 +10,7 @@ public class Main {
     public static void main(String[] args) {
         try {
             TelegramBotsApi telegramBotsApi = new TelegramBotsApi(DefaultBotSession.class);
-            telegramBotsApi.registerBot(new MyBot("7025174805:AAGxsa_1Se_gs2LMVf0VptacRNtm4LALkv0"));
+            telegramBotsApi.registerBot(new MyBot("YOUR_BOT_TOKEN"));
         } catch (TelegramApiException e) {
             e.printStackTrace();
         }
